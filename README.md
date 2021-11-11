@@ -1,7 +1,9 @@
 #Face Detection
 
 ##Methods
+
 ###1. RetinaFace
+
 Based on pytorch.
 
 Can use Mobilenet or Resnet50(recommended for accuracy) as backbone.
@@ -17,8 +19,11 @@ the result is in result/result_100.csv.
 The result of all images in /profile pics will be updated by the noon of Nov.13 2021.
 
 ####Problem:
+
 A few cartoon person are detected as human face.
+
 ###2. SCRFD
+
 Based on OpenCV 4.0+
 
 **##TO-DO**
