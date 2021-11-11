@@ -1,30 +1,97 @@
-import pandas as pd
-import numpy as np
-import csv
 import os
+import torch
+from itertools import product as product
+import numpy as np
+from math import ceil
 
-# extract img_path from json and join with csv file on user id
-def read_files(json_file, csv_file, img_dir):
-    json_with_image_path = pd.read_json(json_file)
-    csv = pd.read_csv(csv_file)
-    joined_df = csv.join(json_with_image_path.set_index('id'), on = 'user_id',how='inner').drop(['name','screen_name','description','lang'],axis = 1).dropna(axis= 0)
 
-    img_filenames = joined_df['img_path'].to_list()
-    for idx, path in enumerate(img_filenames):
-        #print(img_dir+'/'+str(path.split('/')[-1]))
-        img_filenames[idx]= img_dir+path.split('/')[-1]
-        
-    label = joined_df['race'].to_list()
-    return img_filenames, label
+class PriorBox(object):
+    def __init__(self, cfg, image_size=None, phase='train'):
+        super(PriorBox, self).__init__()
+        self.min_sizes = cfg['min_sizes']
+        self.steps = cfg['steps']
+        self.clip = cfg['clip']
+        self.image_size = image_size
+        self.feature_maps = [[ceil(self.image_size[0]/step), ceil(self.image_size[1]/step)] for step in self.steps]
+        self.name = "s"
 
-# Helper function to detect faces in the list
-def detect_face(img):
-    # TODO: detect if img (converted numpy array format) is a face
-    pass
+    def forward(self):
+        anchors = []
+        for k, f in enumerate(self.feature_maps):
+            min_sizes = self.min_sizes[k]
+            for i, j in product(range(f[0]), range(f[1])):
+                for min_size in min_sizes:
+                    s_kx = min_size / self.image_size[1]
+                    s_ky = min_size / self.image_size[0]
+                    dense_cx = [x * self.steps[k] / self.image_size[1] for x in [j + 0.5]]
+                    dense_cy = [y * self.steps[k] / self.image_size[0] for y in [i + 0.5]]
+                    for cy, cx in product(dense_cy, dense_cx):
+                        anchors += [cx, cy, s_kx, s_ky]
 
-if __name__ == '__main__':
-    # test paths
-    img_lst, label_lst = read_files('./demographicPrediction/User demo profiles.json', './demographicPrediction/labeled_users.csv','./demographicPrediction/profile_pics/profile pics/')
-    print(img_lst[:3])
-    
+        # back to torch land
+        output = torch.Tensor(anchors).view(-1, 4)
+        if self.clip:
+            output.clamp_(max=1, min=0)
+        return output
 
+
+def getImgList(dirPath):
+    imgList = []
+    for filename in os.listdir(dirPath):
+        if filename.lower().endswith(
+                ('.bmp', '.dib', '.png', '.jpg', '.jpeg', '.pbm', '.pgm', '.ppm', '.tif', '.tiff')):
+            imgList.append(filename)
+    return imgList
+
+
+# Adapted from https://github.com/Hakuyume/chainer-ssd
+def decode(loc, priors, variances):
+    """Decode locations from predictions using priors to undo
+    the encoding we did for offset regression at train time.
+    Args:
+        loc (tensor): location predictions for loc layers,
+            Shape: [num_priors,4]
+        priors (tensor): Prior boxes in center-offset form.
+            Shape: [num_priors,4].
+        variances: (list[float]) Variances of priorboxes
+    Return:
+        decoded bounding box predictions
+    """
+
+    boxes = torch.cat((
+        priors[:, :2] + loc[:, :2] * variances[0] * priors[:, 2:],
+        priors[:, 2:] * torch.exp(loc[:, 2:] * variances[1])), 1)
+    boxes[:, :2] -= boxes[:, 2:] / 2
+    boxes[:, 2:] += boxes[:, :2]
+    return boxes
+
+
+def py_cpu_nms(dets, thresh):
+    """Pure Python NMS baseline."""
+    x1 = dets[:, 0]
+    y1 = dets[:, 1]
+    x2 = dets[:, 2]
+    y2 = dets[:, 3]
+    scores = dets[:, 4]
+
+    areas = (x2 - x1 + 1) * (y2 - y1 + 1)
+    order = scores.argsort()[::-1]
+
+    keep = []
+    while order.size > 0:
+        i = order[0]
+        keep.append(i)
+        xx1 = np.maximum(x1[i], x1[order[1:]])
+        yy1 = np.maximum(y1[i], y1[order[1:]])
+        xx2 = np.minimum(x2[i], x2[order[1:]])
+        yy2 = np.minimum(y2[i], y2[order[1:]])
+
+        w = np.maximum(0.0, xx2 - xx1 + 1)
+        h = np.maximum(0.0, yy2 - yy1 + 1)
+        inter = w * h
+        ovr = inter / (areas[i] + areas[order[1:]] - inter)
+
+        inds = np.where(ovr <= thresh)[0]
+        order = order[inds + 1]
+
+    return keep
