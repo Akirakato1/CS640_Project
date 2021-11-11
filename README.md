@@ -8,6 +8,8 @@ Can use Mobilenet or Resnet50(recommended for accuracy) as backbone.
 
 The trained model weights are in weights/retina_face folder.
 
+Note: Resnet50 model is bigger than 100Mb, can be downloaded via https://drive.google.com/drive/folders/1oZRSG0ZegbVkVwUd8wUIQx8W7yfZ_ki1
+
 Have generated is_face-labels for First 100 images, 
 
 the result is in result/result_100.csv.
