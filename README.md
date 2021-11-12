@@ -16,7 +16,7 @@ Have generated is_face-labels for First 100 images,
 
 the result is in result/result_100.csv.
 
-The result of all images in /profile pics will be updated by the noon of Nov.13 2021.
+The result of all images in /profile pics has been updated in result/result_all.csv.
 
 ####Problem:
 
