@@ -5,6 +5,7 @@ import cv2
 from tqdm import tqdm
 import numpy as np
 import pandas as pd
+import json
 from utils import getImgList, PriorBox, decode, py_cpu_nms
 from models.retinaFace import RetinaFace
 from config import cfg_re50, cfg_mnet
@@ -55,8 +56,18 @@ if __name__ == "__main__":
     nms_threshold = 0.55
     top_k = 5000
     keep_top_k = 500
-    imgDir = 'sourceFiles/profile pics'
-    imgList = getImgList(imgDir)
+
+    # load all images
+    # imgDir = 'sourceFiles/profile pics'
+    # imgList = getImgList(imgDir)
+    # or load image only in  'User demo profiles.json'
+    imgDir = 'sourceFiles'
+    with open("./sourceFiles/User demo profiles.json", 'r', encoding='UTF-8') as load_f2:
+        profile_dict = json.load(load_f2)
+    imgList = []
+    for i, item in enumerate(profile_dict):
+        imgList.append(item["img_path"])
+
     cfg = None
     if backbone == "mobile0.25":
         cfg = cfg_mnet
@@ -80,6 +91,10 @@ if __name__ == "__main__":
         # if idx > 99:
         #     break
         img_raw = cv2.imread(os.path.join(imgDir, imgPath))
+        if img_raw is None:
+            coefficients.append(-1)
+            print(imgPath + " is not existed")
+            continue
         img = np.float32(img_raw)
         im_height, im_width, _ = img.shape
         scale = torch.Tensor([img.shape[1], img.shape[0], img.shape[1], img.shape[0]])
@@ -122,11 +137,11 @@ if __name__ == "__main__":
         #     coefficients.append(0.)
         #     continue
         if len(dets) == 0 or len(dets[0]) < 3 or dets[0][4] < nms_threshold:
-            is_face.append(0)
+            # is_face.append(0)
             coefficients.append(0.)
             continue
         else:
-            is_face.append(1)
+            # is_face.append(1)
             score = "{:.4f}".format(dets[0][4])
             coefficients.append(score)
 
@@ -144,5 +159,5 @@ if __name__ == "__main__":
             cv2.imshow(str(imgPath), img_raw)
             cv2.waitKey(500)
 
-    dataFrame = pd.DataFrame({'img': imgList, 'is_face': is_face, 'coefficient': coefficients})
-    dataFrame.to_csv('results/result_all.csv', index=False)
+    dataFrame = pd.DataFrame({'img': imgList, 'coefficient': coefficients})
+    dataFrame.to_csv('results/result_User_demo_profiles_json.csv', index=False)
