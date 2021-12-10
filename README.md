@@ -8,13 +8,13 @@ Twitter user profile and it's most recent 100 tweets
 2. Train CNN model on UTK face
 3. Race prediction:<br />
 (1) CNN<br />
-(2) TF-IDF<br />
+(2) TF-IDF Logistic Regression<br />
 (3) BERT<br />
 4. Age prediction:<br />
-(1) TF-IDF<br />
+(1) TF-IDF Logistic Regression<br />
 (2) Navie bayes<br />
-(3) Bert<br />
-(4) Bert-LSTM-FC<br />
+(3) BERT<br />
+(4) BERT-LSTM-FC<br />
 ## Models
 Models directory contains all final models tried in their own folders.
 ### Race Prediction-Tf-idf Vectorizer Logistic Regression
