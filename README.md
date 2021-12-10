@@ -15,4 +15,7 @@ Twitter user profile and it's most recent 100 tweets
 (2) Navie bayes
 (3) Bert
 (4) Bert-LSTM-FC
-#### Text
+#### Models
+Models directory contains all final models tried in their own folders.
+
+Face detection model is in the branch faceDetection.
