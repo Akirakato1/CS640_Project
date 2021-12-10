@@ -7,8 +7,8 @@ Twitter user profile and it's most recent 100 tweets
 1. Text Processing
 2. Train CNN model on UTK face
 3. Race prediction:
-(1) CNN
-(2) TF-IDF
+(1) CNN__
+(2) TF-IDF__
 (3) BERT
 4. Age prediction:
 (1) TF-IDF
