@@ -6,13 +6,13 @@ Twitter user profile and it's most recent 100 tweets
 1. Text Processing
 2. Train CNN model on UTK face
 3. Race prediction:
-    CNN
-    TF-IDF
-    BERT
+(1) CNN
+(2) TF-IDF
+(3) BERT
     
 4. Age prediction:
-    TF-IDF
-    Navie bayes
-    Bert
-    Bert-LSTM-FC
+(1) TF-IDF
+(2) Navie bayes
+(3) Bert
+(4) Bert-LSTM-FC
 #### Text
