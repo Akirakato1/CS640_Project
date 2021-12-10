@@ -1,4 +1,7 @@
 # CS640_Project
+## Disclaimer
+All cleaned and raw data has been removed upon making this repo public since they are proprietary. 
+
 ## Goal
 Demographic (Age (<21 and >=21) and Race (black, white, Hispanic/Latino, Asian) prediction of Twitter users
 ## Existing Data
