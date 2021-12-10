@@ -12,7 +12,7 @@ Twitter user profile and it's most recent 100 tweets
 (3) BERT<br />
 4. Age prediction:<br />
 (1) TF-IDF Logistic Regression<br />
-(2) Navie bayes<br />
+(2) TF-IDF Multinomial Naive bayes<br />
 (3) BERT<br />
 (4) BERT-LSTM-FC<br />
 ## Models
@@ -46,6 +46,11 @@ We chose this method because TF-IDF can turn text into vector features, and logi
 #### Model Description:
 Use TfidfVectorizer with min_df=4 then use LogisticRegression from sklearn to train model. Feature space around 10k. 
 
+### Per tweet and per user
+
+We set 2 modes to feed the inputs into the models, 
+the first is using per tweet as an input, 
+the second is merging all tweets per user to one tweet. 
 
 ### Age Prediction-TFIDF Vectorizer + Multinomial Naive Bayes
 We chose this method because TFIDF can turn text into vector features, and logistic regression can identify the relationship between word frequencies and race. 
@@ -75,7 +80,11 @@ We tried 2 models for race predictions and 4 models for age prediction that uses
 For models that we used profile pictures, the race prediction works well on UTK dataset but performed poorly on the Twitter user profile picture dataset. This is because the profile pictures has too much noise. Some of them are not actual user face, some of them used a filter, some of them are taken from a weird direction. We’ve tried to remove those noise, but the result is still not satisfying.
 
 ## Todo:
-Use CNN to get user's profiles features, use Bert to get user's all tweets features. Process these features and concatenate all these features of one user together as training data, input these data to LSTM and FC.
+Use BertTokenizer and frozen BertModel to get the features of every tweet,
+and concatenate them by the usernames, 
+then feed them into the LSTM+FC network, 
+so that we can get the full information of all tweets. 
+Then, combine them with the features extracted from a feature extractor(such as CNN model) of the profile picture to train a classifier.
 
 
-
+![routine](models/age/data/routine.png)
